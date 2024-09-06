@@ -70,17 +70,15 @@ jobs:
 
             # Extract image name and tag (remove nvcr.io part)
             image_name=$(echo $image | cut -d'/' -f4)
-            echo $image
-            echo $image ghcr.io/${{ github.repository }}/$image_name
 
             # Pull the image from nvcr.io
-            #docker pull $image
+            docker pull $image
 
             # Tag the image for ghcr.io (maintaining name and tag)
-            #docker tag $image ghcr.io/${{ github.repository }}/$image_name
+            docker tag $image ghcr.io/mmg10/$image_name
 
             # Push the image to ghcr.io
-            #docker push ghcr.io/${{ github.repository }}/$image_name
+            docker push ghcr.io/mmg10/$image_name
 
           done
           
