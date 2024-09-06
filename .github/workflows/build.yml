@@ -82,6 +82,8 @@ jobs:
 
              # remove images
             docker rmi $image -f
+            docker system prune -af
+            
 
           done
           
