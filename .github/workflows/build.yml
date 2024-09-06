@@ -1,0 +1,133 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMG: pytorch:llm
+  
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+      
+    defaults:
+      run:
+        working-directory: './slurm'
+
+    steps:
+
+      - name: Clear Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          docker-images: false
+          tool-cache: true
+        
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      # - name: Login to Public ECR
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: public.ecr.aws
+      #     username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   env:
+      #     AWS_REGION: us-east-1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: 763104351884
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Log in to nvcr.io
+        run: |
+          echo "$NVIDIA_REGISTRY_TOKEN" | docker login nvcr.io -u '$NVIDIA_REGISTRY_USER' --password-stdin
+        env:
+          NVIDIA_REGISTRY_USER: ${{ secrets.NVCR_USERNAME }}
+          NVIDIA_REGISTRY_TOKEN: ${{ secrets.NVCR_TOKEN }}
+          
+      - name: Pull image from nvcr.io
+        run: |
+          docker pull nvcr.io/ohlfw0olaadg/ea-participants/nv-yolox-structured-images-v1:0.1.0
+      - name: Tag image for GitHub Container Registry
+        run: |
+          docker tag nvcr.io/ohlfw0olaadg/ea-participants/nv-yolox-structured-images-v1:0.1.0 ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          docker push ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
+      # - name: yolo
+      #   id: build-and-push-yolo
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./yolo.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
+      #     #tags: "${{ env.IMG }}"
+
+      # - name: deplot
+      #   id: build-and-push-deplot
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./deplot.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/deplot:1.0.0
+      #     #tags: "${{ env.IMG }}"
+
+      # - name: cached
+      #   id: build-and-push-cached
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./cached.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/cached:0.1.0
+      #     #tags: "${{ env.IMG }}"
+
+      # - name: embedding
+      #   id: build-and-push-embedding
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./embedding.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/nv-embedqa-e5-v5:1.0.0
+      #     #tags: "${{ env.IMG }}"
+
+      # - name: paddleocr
+      #   id: build-and-push-paddleocr
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./paddleocr.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/paddleocr:0.1.0
+      #     #tags: "${{ env.IMG }}"
+
+      # - name: nv-ingest
+      #   id: build-and-push-nv-ingest
+      #   uses: docker/build-push-action@v6.5.0
+      #   with:
+      #     context: ./nv-ingest.Dockerfile
+      #     push: true
+      #     tags: ghcr.io/mmg10/nv-ingest:24.08
+      #     #tags: "${{ env.IMG }}"
+      
