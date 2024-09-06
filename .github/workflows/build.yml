@@ -80,6 +80,9 @@ jobs:
             # Push the image to ghcr.io
             docker push ghcr.io/mmg10/$image_name
 
+             # remove images
+            docker rmi $image -f
+
           done
           
         #   - name: Push image to GitHub Container Registry
