@@ -62,16 +62,31 @@ jobs:
         env:
           NVIDIA_REGISTRY_TOKEN: ${{ secrets.NVCR_TOKEN }}
           
-      - name: Pull image from nvcr.io
+      - name: Pull, Tag, and Push images
         run: |
-          docker pull nvcr.io/ohlfw0olaadg/ea-participants/nv-yolox-structured-images-v1:0.1.0
-      - name: Tag image for GitHub Container Registry
-        run: |
-          docker tag nvcr.io/ohlfw0olaadg/ea-participants/nv-yolox-structured-images-v1:0.1.0 ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
+          # Read the list of images from images.txt
+          cat images.txt | while read image; do
+            echo "Processing $image"
 
-      - name: Push image to GitHub Container Registry
-        run: |
-          docker push ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
+            # Extract image name and tag (remove nvcr.io part)
+            image_name=$(echo $image | cut -d'/' -f3)
+            echo $image
+            echo $image ghcr.io/${{ github.repository }}/$image_name
+
+            # Pull the image from nvcr.io
+            #docker pull $image
+
+            # Tag the image for ghcr.io (maintaining name and tag)
+            #docker tag $image ghcr.io/${{ github.repository }}/$image_name
+
+            # Push the image to ghcr.io
+            #docker push ghcr.io/${{ github.repository }}/$image_name
+
+          done
+          
+        #   - name: Push image to GitHub Container Registry
+        # run: |
+        #   docker push ghcr.io/mmg10/nv-yolox-structured-images-v1:0.1.0
       # - name: yolo
       #   id: build-and-push-yolo
       #   uses: docker/build-push-action@v6.5.0
