@@ -69,7 +69,7 @@ jobs:
             echo "Processing $image"
 
             # Extract image name and tag (remove nvcr.io part)
-            image_name=$(echo $image | cut -d'/' -f3)
+            image_name=$(echo $image | cut -d'/' -f4)
             echo $image
             echo $image ghcr.io/${{ github.repository }}/$image_name
 
