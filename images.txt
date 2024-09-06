@@ -1,2 +1,1 @@
-nvcr.io/nim/nvidia/nv-rerankqa-mistral-4b-v3:1.0.1
 nvcr.io/nim/nvidia/nv-embedqa-mistral-7b-v2:1.0.1
