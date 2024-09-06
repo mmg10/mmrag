@@ -58,9 +58,8 @@ jobs:
 
       - name: Log in to nvcr.io
         run: |
-          echo "$NVIDIA_REGISTRY_TOKEN" | docker login nvcr.io -u '$NVIDIA_REGISTRY_USER' --password-stdin
+          echo "$NVIDIA_REGISTRY_TOKEN" | docker login nvcr.io --username=\$oauthtoken --password-stdin
         env:
-          NVIDIA_REGISTRY_USER: ${{ secrets.NVCR_USERNAME }}
           NVIDIA_REGISTRY_TOKEN: ${{ secrets.NVCR_TOKEN }}
           
       - name: Pull image from nvcr.io
